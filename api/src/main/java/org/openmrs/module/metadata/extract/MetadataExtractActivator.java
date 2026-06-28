@@ -11,29 +11,41 @@ package org.openmrs.module.metadata.extract;
 
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.Daemon;
 import org.openmrs.module.BaseModuleActivator;
-import org.openmrs.module.metadata.extract.api.impl.ExporterServiceImpl;
+import org.openmrs.module.DaemonToken;
+import org.openmrs.module.DaemonTokenAware;
+import org.openmrs.module.metadata.extract.api.ExporterService;
 import org.openmrs.util.OpenmrsUtil;
-import org.openmrs.util.PrivilegeConstants;
 
 import java.io.File;
 
 @Slf4j
-public class MetadataExtractActivator extends BaseModuleActivator {
+public class MetadataExtractActivator extends BaseModuleActivator implements DaemonTokenAware {
+	
+	private DaemonToken daemonToken;
+	
+	@Override
+	public void setDaemonToken(DaemonToken token) {
+		this.daemonToken = token;
+	}
 	
 	@Override
 	public void started() {
+		// Export on a daemon thread: the daemon user is a super-user, so it can read every domain
+		// without juggling proxy privileges, and startup is not blocked on the export.
+		Daemon.runInDaemonThreadWithoutResult(this::exportAllMetadata, daemonToken);
+	}
+	
+	private void exportAllMetadata() {
 		File outDir = new File(OpenmrsUtil.getApplicationDataDirectory(), "metadata_extract");
 		try {
-			Context.addProxyPrivilege(PrivilegeConstants.GET_CONCEPTS);
-			new ExporterServiceImpl().exportConcepts(null, outDir, "concepts.csv");
-			log.info("Metadata Extract: exported concepts to {}", outDir.getAbsolutePath());
+			ExporterService exporterService = Context.getRegisteredComponents(ExporterService.class).get(0);
+			exporterService.export(outDir, null);
+			log.info("Metadata Extract: exported metadata to {}", outDir.getAbsolutePath());
 		}
 		catch (Exception e) {
-			log.error("Metadata Extract: failed to export concepts on startup", e);
-		}
-		finally {
-			Context.removeProxyPrivilege(PrivilegeConstants.GET_CONCEPTS);
+			log.error("Metadata Extract: failed to export metadata on startup", e);
 		}
 	}
 }

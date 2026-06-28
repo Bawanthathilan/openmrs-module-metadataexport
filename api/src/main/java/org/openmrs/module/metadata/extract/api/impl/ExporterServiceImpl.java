@@ -9,70 +9,64 @@
  */
 package org.openmrs.module.metadata.extract.api.impl;
 
-import org.openmrs.Concept;
-import org.openmrs.ConceptAnswer;
-import org.openmrs.ConceptSet;
 import org.openmrs.OpenmrsObject;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.initializer.Domain;
 import org.openmrs.module.metadata.extract.api.ExporterService;
-import org.openmrs.module.metadata.extract.api.concept.ConceptLineExporter;
-import org.openmrs.module.metadata.extract.api.concept.ConceptNumericExporter;
-import org.openmrs.module.metadata.extract.api.export.BaseLineExporter;
-import org.openmrs.module.metadata.extract.api.export.CsvExporter;
+import org.openmrs.module.metadata.extract.api.export.DomainExporter;
+import org.openmrs.module.metadata.extract.api.export.DomainExporterRegistry;
+import org.openmrs.module.metadata.extract.api.export.ExportContext;
+import org.openmrs.module.metadata.extract.api.select.ExportManifest;
+import org.openmrs.module.metadata.extract.api.select.Selector;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
-import java.util.LinkedHashMap;
 import java.util.List;
 
+@Component
 public class ExporterServiceImpl implements ExporterService {
 	
-	@Override
-	public <T extends OpenmrsObject> void export(Collection<T> instances, List<BaseLineExporter<T>> chain, Domain domain,
-	        File outDir, String fileName) throws IOException {
-		new CsvExporter<>(chain, domain).writeCsv(instances, outDir, fileName);
+	private final DomainExporterRegistry registry;
+	
+	@Autowired
+	public ExporterServiceImpl(DomainExporterRegistry registry) {
+		this.registry = registry;
 	}
 	
 	@Override
-	public void exportConcepts(Collection<Concept> seeds, File outDir, String fileName) throws IOException {
-		Collection<Concept> concepts;
-		if (seeds == null || seeds.isEmpty()) {
-			concepts = Context.getConceptService().getAllConcepts();
-		} else {
-			concepts = collectClosure(seeds);
+	public void export(File outDir, Collection<Domain> domains) throws IOException {
+		// Seed selection with every instance of each requested domain, then close over dependencies
+		// so the package is self-contained (cross-domain references are pulled in too).
+		List<OpenmrsObject> seeds = new ArrayList<>();
+		for (DomainExporter<?> exporter : registry.all()) {
+			if (isSelected(domains, exporter.getDomain())) {
+				seeds.addAll(exporter.getAllInstances());
+			}
 		}
 		
-		List<BaseLineExporter<Concept>> chain = Arrays.asList(new ConceptLineExporter(), new ConceptNumericExporter());
-		export(concepts, chain, Domain.CONCEPTS, outDir, fileName);
+		ExportManifest manifest = new Selector(registry).select(seeds);
+		
+		ExportContext context = new ExportContext(outDir);
+		for (Domain domain : manifest.getDomains()) {
+			writeDomain(registry.forDomain(domain), manifest.get(domain), context);
+		}
 	}
 	
-	private Collection<Concept> collectClosure(Collection<Concept> seeds) {
-		LinkedHashMap<String, Concept> visited = new LinkedHashMap<>();
-		Deque<Concept> queue = new ArrayDeque<>(seeds);
-		
-		while (!queue.isEmpty()) {
-			Concept concept = queue.poll();
-			if (concept == null || visited.containsKey(concept.getUuid())) {
-				continue;
-			}
-			visited.put(concept.getUuid(), concept);
-			
-			for (ConceptAnswer answer : concept.getAnswers()) {
-				if (answer.getAnswerConcept() != null) {
-					queue.add(answer.getAnswerConcept());
-				}
-			}
-			for (ConceptSet member : concept.getConceptSets()) {
-				if (member.getConcept() != null) {
-					queue.add(member.getConcept());
-				}
-			}
+	private static boolean isSelected(Collection<Domain> domains, Domain domain) {
+		return domains == null || domains.isEmpty() || domains.contains(domain);
+	}
+	
+	/** Captures the wildcard and narrows the bucket; safe since the manifest bucketed by handles(). */
+	@SuppressWarnings("unchecked")
+	private <T extends OpenmrsObject> void writeDomain(DomainExporter<T> exporter, Collection<OpenmrsObject> bucket,
+	        ExportContext context) throws IOException {
+		List<T> typed = new ArrayList<>();
+		for (OpenmrsObject instance : bucket) {
+			typed.add((T) instance);
 		}
-		return visited.values();
+		exporter.export(typed, context);
 	}
 }

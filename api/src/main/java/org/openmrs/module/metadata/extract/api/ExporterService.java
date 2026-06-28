@@ -9,20 +9,19 @@
  */
 package org.openmrs.module.metadata.extract.api;
 
-import org.openmrs.Concept;
-import org.openmrs.OpenmrsObject;
 import org.openmrs.module.initializer.Domain;
-import org.openmrs.module.metadata.extract.api.export.BaseLineExporter;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
 public interface ExporterService {
 	
-	<T extends OpenmrsObject> void export(Collection<T> instances, List<BaseLineExporter<T>> chain, Domain domain,
-	        File outDir, String fileName) throws IOException;
-	
-	void exportConcepts(Collection<Concept> seeds, File outDir, String fileName) throws IOException;
+	/**
+	 * Export the given domains under {@code outDir} (writing a {@code configuration/} tree). A null or
+	 * empty {@code domains} exports every registered domain. The service holds a registry of
+	 * {@link org.openmrs.module.metadata.extract.api.export.DomainExporter}s and contains no per-domain
+	 * logic itself.
+	 */
+	void export(File outDir, Collection<Domain> domains) throws IOException;
 }

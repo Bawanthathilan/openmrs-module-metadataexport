@@ -1,50 +1,115 @@
-${moduleName}
-==========================
+Metadata Extract
+================
+
+**Active development / experimental.** This module is an early proof of concept. APIs, output
+format, and behaviour will change without notice, and not everything described here is fully
+verified yet. Not for production use.
 
 Description
 -----------
-This is a very basic module which can be used as a starting point in creating a new module.
+Initializer ([openmrs-module-initializer](https://github.com/openmrs/openmrs-module-initializer))
+can *load* a `configuration/` content package into OpenMRS, but it cannot produce one. This module
+does the reverse: it reads metadata out of a running, populated OpenMRS instance and writes it back
+out in the Initializer format, so a configuration can be captured from a server and replayed
+elsewhere.
 
-Building from Source
+It is export only. It never imports or applies metadata; loading remains Initializer's job.
+
+Currently supported domains:
+
+* Concepts (names, descriptions, class/datatype/version, numeric, complex, answers, members,
+  mappings, attributes)
+
+How it works
+------------
+On module startup the activator runs an export on a daemon thread (so it has full read access and
+does not block startup). It writes to:
+
+    <OpenMRS application data directory>/metadata_extract/configuration/<domain>/...
+
+The export is built in two separated stages:
+
+1. Selection. Starting from seed objects, a `Selector` walks each object's dependencies to a
+   fixpoint, producing an `ExportManifest` (the set of objects to export, bucketed by domain). This
+   is what makes a package self-contained: for example, exporting a concept set also pulls in its
+   members.
+2. Export. Each `DomainExporter` writes its bucket in its own format. The service holds a registry
+   of these and contains no per-domain logic.
+
+Requirements
+------------
+The Initializer module must be installed (declared in `config.xml` `require_modules`); this module
+reuses its `Domain` and CSV header definitions.
+
+Adding a new domain
+-------------------
+Supporting a new metadata type is a new class plus one line in the registry, never a new method on
+the service.
+
+1. Write a `DomainExporter` and annotate it `@Component` so it is discovered automatically. For a
+   CSV domain, extend `CsvDomainExporter<T>`:
+
+```java
+@Component
+public class EncounterTypeDomainExporter extends CsvDomainExporter<EncounterType> {
+
+    public Domain getDomain()               { return Domain.ENCOUNTER_TYPES; }
+
+    public boolean handles(OpenmrsObject o) { return o instanceof EncounterType; }
+
+    public Collection<EncounterType> getAllInstances() {
+        return Context.getEncounterService().getAllEncounterTypes();
+    }
+
+    // Objects from OTHER domains this one references, for cross-domain closure. Empty if none.
+    public Collection<? extends OpenmrsObject> getDependencies(EncounterType t) {
+        return Collections.emptyList();
+    }
+
+    protected List<BaseLineExporter<EncounterType>> chain() {
+        return Arrays.asList(new EncounterTypeLineExporter());
+    }
+
+    protected String fileName() { return "encounterTypes.csv"; }
+}
+```
+
+2. Write the line exporter(s). Each `BaseLineExporter<T>` writes header to value pairs into an
+   `ExportLine`; it is the inverse of Initializer's matching `BaseLineProcessor.fill(...)`. Reuse
+   Initializer's header constants where they are `public` so the two sides cannot drift:
+
+```java
+public class EncounterTypeLineExporter extends BaseLineExporter<EncounterType> {
+    public void export(EncounterType t, ExportLine line) {
+        line.put(BaseLineProcessor.HEADER_UUID, t.getUuid());
+        line.put(BaseLineProcessor.HEADER_NAME, t.getName());
+        line.put(BaseLineProcessor.HEADER_DESC, t.getDescription());
+    }
+}
+```
+
+A CSV domain may emit more than one file by overriding `partition(instances)` (the default is one
+file). A non-CSV domain (for example forms as JSON) skips `CsvDomainExporter` and implements
+`DomainExporter` directly, writing whatever files it likes in `export(bucket, context)`.
+
+That is all. Because the exporter is a `@Component`, it is registered automatically; there is no
+list to edit. Selection, closure, routing, and writing are handled by the framework.
+
+Known limitations
+-----------------
+* Concept description UUIDs and index-term names are not round-trip-able (Initializer
+  format/loader limitations), so they are not preserved or re-loadable.
+* Selection currently exports all instances of the registered domains; instance-level seed
+  selection is not yet exposed.
+* Cross-domain closure only pulls in objects whose domain has a registered exporter.
+
+Building from source
 --------------------
-You will need to have Java 1.6+ and Maven 2.x+ installed.  Use the command 'mvn package' to 
-compile and package the module.  The .omod file will be in the omod/target folder.
-
-Alternatively you can add the snippet provided in the [Creating Modules](https://wiki.openmrs.org/x/cAEr) page to your 
-omod/pom.xml and use the mvn command:
-
-    mvn package -P deploy-web -D deploy.path="../../openmrs-1.8.x/webapp/src/main/webapp"
-
-It will allow you to deploy any changes to your web 
-resources such as jsp or js files without re-installing the module. The deploy path says 
-where OpenMRS is deployed.
-
-Running Spotless
-----------------
-This project uses Spotless for code formatting. Spotless is embedded in the build process, so when you run `mvn clean package`, Spotless will automatically format your code according to the project's style guidelines.
-
-If you want to run Spotless separately, you can use the following Maven commands:
-
-To apply the formatting:
-
-    mvn spotless:apply
-
-This will automatically format your code according to the project's style guidelines. It's recommended to run this command before committing your changes.
-
-To check if your code adheres to the style guidelines without making any changes, you can run:
-
-    mvn spotless:check
-
-If this command reports any violations, you can then run `mvn spotless:apply` to fix them.
-
-Remember, in most cases, you don't need to run these commands separately as Spotless will run automatically during the build process with `mvn clean package`.
+Java 8+ and Maven. `mvn clean package` produces `omod/target/metadata.extract-*.omod`. Code
+formatting is handled by Spotless during the build (`mvn spotless:apply` to format manually).
 
 Installation
 ------------
-1. Build the module to produce the .omod file.
-2. Use the OpenMRS Administration > Manage Modules screen to upload and install the .omod file.
-
-If uploads are not allowed from the web (changable via a runtime property), you can drop the omod
-into the ~/.OpenMRS/modules folder.  (Where ~/.OpenMRS is assumed to be the Application 
-Data Directory that the running openmrs is currently using.)  After putting the file in there 
-simply restart OpenMRS/tomcat and the module will be loaded and started.
+Build the `.omod`, then either upload it via Administration > Manage Modules or drop it into the
+OpenMRS application data directory's `modules/` folder and restart. Ensure the Initializer module
+is also installed.
