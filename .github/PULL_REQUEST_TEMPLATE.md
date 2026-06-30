@@ -1,6 +1,6 @@
 <!--- Add a pull request title above in this format -->
 <!--- real example: 'ME-5111: Replace use of deprecated isVoided' -->
-<!--- 'TRUNK-JiraIssueNumber: JiraIssueTitle' -->
+<!--- 'ME-JiraIssueNumber: JiraIssueTitle' -->
 ## Description of what I changed
 <!--- Describe your changes in detail -->
 <!--- It can simply be your commit message, which you must have -->
