@@ -52,6 +52,6 @@ public class VisitTypeDomainExporter extends CsvDomainExporter<VisitType> {
 	
 	@Override
 	protected String fileName() {
-		return "visittypes.csv";
+		return "visitTypes.csv";
 	}
 }
