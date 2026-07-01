@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
 
 public class RoleLineExporter extends MetadataLineExporter<Role> {
 	
-	static final String HEADER_ROLE_NAME = "role name";
+	static final String HEADER_ROLE_NAME = "Role name";
 	
-	static final String HEADER_INHERITED_ROLES = "inherited roles";
+	static final String HEADER_INHERITED_ROLES = "Inherited roles";
 	
-	static final String HEADER_PRIVILEGES = "privileges";
+	static final String HEADER_PRIVILEGES = "Privileges";
 	
 	@Override
 	public void export(Role role, ExportLine line) {

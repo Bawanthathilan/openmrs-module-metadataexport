@@ -41,10 +41,10 @@ class RoleLineExporterTest {
 		new RoleLineExporter().writeLine(role, line);
 		
 		assertEquals("d2fcb604-2700-102b-80cb-0017a47871b2", line.get("uuid"));
-		assertEquals("Organizational: Doctor", line.get("role name"));
+		assertEquals("Organizational: Doctor", line.get("Role name"));
 		assertEquals("Doctor role", line.get("description"));
-		assertEquals("Application: Records Allergies; Application: Uses Patient Summary", line.get("inherited roles"));
-		assertEquals("Add Allergies; Add Patient", line.get("privileges"));
+		assertEquals("Application: Records Allergies; Application: Uses Patient Summary", line.get("Inherited roles"));
+		assertEquals("Add Allergies; Add Patient", line.get("Privileges"));
 	}
 	
 	@Test
@@ -57,9 +57,9 @@ class RoleLineExporterTest {
 		ExportLine line = new ExportLine();
 		new RoleLineExporter().export(role, line);
 		
-		assertEquals("Organizational: Nurse", line.get("role name"));
-		assertNull(line.get("inherited roles"));
-		assertNull(line.get("privileges"));
+		assertEquals("Organizational: Nurse", line.get("Role name"));
+		assertNull(line.get("Inherited roles"));
+		assertNull(line.get("Privileges"));
 	}
 	
 	@Test
@@ -88,6 +88,6 @@ class RoleLineExporterTest {
 		ExportLine line = new ExportLine();
 		new RoleLineExporter().export(role, line);
 		
-		assertEquals("Add Orders", line.get("privileges"));
+		assertEquals("Add Orders", line.get("Privileges"));
 	}
 }
