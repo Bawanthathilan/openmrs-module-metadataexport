@@ -47,7 +47,7 @@ public class VisitTypeDomainExporter extends CsvDomainExporter<VisitType> {
 	
 	@Override
 	protected List<BaseLineExporter<VisitType>> chain() {
-		return Arrays.asList(new VisitTypeLineExporter());
+		return Collections.singletonList(new VisitTypeLineExporter());
 	}
 	
 	@Override
