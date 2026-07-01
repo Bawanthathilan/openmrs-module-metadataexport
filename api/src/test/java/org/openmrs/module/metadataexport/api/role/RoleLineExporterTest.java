@@ -38,13 +38,13 @@ class RoleLineExporterTest {
 		role.setPrivileges(privileges);
 		
 		ExportLine line = new ExportLine();
-		new RoleLineExporter().export(role, line);
+		new RoleLineExporter().writeLine(role, line);
 		
 		assertEquals("d2fcb604-2700-102b-80cb-0017a47871b2", line.get("uuid"));
-		assertEquals("Organizational: Doctor", line.get("Role name"));
+		assertEquals("Organizational: Doctor", line.get("role name"));
 		assertEquals("Doctor role", line.get("description"));
-		assertEquals("Application: Records Allergies; Application: Uses Patient Summary", line.get("Inherited roles"));
-		assertEquals("Add Allergies; Add Patient", line.get("Privileges"));
+		assertEquals("Application: Records Allergies; Application: Uses Patient Summary", line.get("inherited roles"));
+		assertEquals("Add Allergies; Add Patient", line.get("privileges"));
 	}
 	
 	@Test
@@ -57,9 +57,22 @@ class RoleLineExporterTest {
 		ExportLine line = new ExportLine();
 		new RoleLineExporter().export(role, line);
 		
-		assertEquals("Organizational: Nurse", line.get("Role name"));
-		assertNull(line.get("Inherited roles"));
-		assertNull(line.get("Privileges"));
+		assertEquals("Organizational: Nurse", line.get("role name"));
+		assertNull(line.get("inherited roles"));
+		assertNull(line.get("privileges"));
+	}
+	
+	@Test
+	void retiredRoleEmitsUuidAndFlagOnly() {
+		Role role = new Role("Organizational: Doctor", "Doctor role");
+		role.setUuid("d2fcb604-2700-102b-80cb-0017a47871b2");
+		role.setRetired(true);
+		
+		ExportLine line = new ExportLine();
+		new RoleLineExporter().writeLine(role, line);
+		
+		assertEquals("true", line.get("void/retire"));
+		assertNull(line.get("role name"), "retired rows carry only uuid + flag");
 	}
 	
 	@Test
@@ -75,6 +88,6 @@ class RoleLineExporterTest {
 		ExportLine line = new ExportLine();
 		new RoleLineExporter().export(role, line);
 		
-		assertEquals("Add Orders", line.get("Privileges"));
+		assertEquals("Add Orders", line.get("privileges"));
 	}
 }
