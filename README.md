@@ -28,6 +28,7 @@ Currently supported domains:
     location/uniqueness behavior)
 * Visit types (name, description)
 * Relationship types (name, description, a_is_to_b, b_is_to_a, preferred, weight)
+* Attribute types (name, description, Min occurs, Max occurs, Datatype classname, Datatype config, Preferred handler classname, Handler config)
 * Global properties (property, value) — written as XML, since Initializer loads this domain from
   XML rather than CSV
 * Encounter Roles (name, description)
