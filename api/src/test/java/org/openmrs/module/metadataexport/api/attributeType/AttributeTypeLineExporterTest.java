@@ -63,7 +63,7 @@ class AttributeTypeLineExporterTest {
 	}
 	
 	@Test
-	void retiredAttributeTypeEmitsUuidAndFlagOnly() {
+	void retiredAttributeTypeEmitsUuidFlagEntityNameAndName() {
 		ProviderAttributeType at = new ProviderAttributeType();
 		at.setUuid("some-uuid");
 		at.setName("Provider Rating");
@@ -73,12 +73,14 @@ class AttributeTypeLineExporterTest {
 		new AttributeTypeLineExporter().writeLine(at, line);
 		
 		assertEquals("true", line.get("void/retire"));
-		assertNull(line.get("Entity name"), "retired rows carry only uuid + flag");
+		assertEquals("Provider", line.get("Entity name"), "Initializer needs entity name to route the retire");
+		assertEquals("Provider Rating", line.get("name"), "Initializer needs name to locate the record");
+		assertNull(line.get("description"), "other domain columns must be absent on retired rows");
 	}
 	
 	@Test
 	void entityNameMappingCoversAllTypes() {
-        assertEquals("Location", entityNameFor(new LocationAttributeType()));
+		assertEquals("Location", entityNameFor(new LocationAttributeType()));
 		assertEquals("Visit", entityNameFor(new VisitAttributeType()));
 		assertEquals("Provider", entityNameFor(new ProviderAttributeType()));
 		assertEquals("Concept", entityNameFor(new ConceptAttributeType()));
