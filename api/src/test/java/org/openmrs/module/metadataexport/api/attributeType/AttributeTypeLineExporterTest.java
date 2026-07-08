@@ -10,6 +10,7 @@
 package org.openmrs.module.metadataexport.api.attributeType;
 
 import org.junit.jupiter.api.Test;
+import org.openmrs.ConceptAttributeType;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.ProgramAttributeType;
 import org.openmrs.ProviderAttributeType;
@@ -77,7 +78,10 @@ class AttributeTypeLineExporterTest {
 	
 	@Test
 	void entityNameMappingCoversAllTypes() {
+        assertEquals("Location", entityNameFor(new LocationAttributeType()));
 		assertEquals("Visit", entityNameFor(new VisitAttributeType()));
+		assertEquals("Provider", entityNameFor(new ProviderAttributeType()));
+		assertEquals("Concept", entityNameFor(new ConceptAttributeType()));
 		assertEquals("Program", entityNameFor(new ProgramAttributeType()));
 	}
 	
