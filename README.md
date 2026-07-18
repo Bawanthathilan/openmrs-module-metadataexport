@@ -38,6 +38,7 @@ Currently supported domains:
   are pulled in via cross-domain closure
 * Order types (name, description, java class name, parent, concept classes) — parent order types and
   concept classes are pulled in via cross-domain closure
+* Flags (name, criteria, evaluator, message, priority, enabled, tags, description)
 
 Planned domains (openmrs-core metadata, not yet supported):
 
