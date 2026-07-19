@@ -41,11 +41,13 @@ Currently supported domains:
 * Flags (name, criteria, evaluator, message, priority, enabled, tags, description)
 * Order frequencies (frequency per day, concept frequency) — the referenced concept is pulled in via
   cross domain closure
+* Programs (program concept, outcomes concept) — the referenced concepts are pulled in via
+  cross domain closure
 
 Planned domains (openmrs-core metadata, not yet supported):
 
-* Tier 3 — concept-dependent: drugs, programs/workflows/states, concept sets, concept reference
-  ranges
+* Tier 3 — concept-dependent: drugs, order frequencies, program workflows/states, concept sets,
+  concept reference ranges
 
 Non-exportable Initializer domains (Liquibase, JSON key-values, system tasks) are
 out of scope.
