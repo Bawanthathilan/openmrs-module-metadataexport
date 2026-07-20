@@ -36,8 +36,8 @@ class ProgramLineExporterTest {
 		new ProgramLineExporter().writeLine(program, line);
 		
 		assertEquals("eae98b4c-e195-403b-b34a-82d94103b2c0", line.get("uuid"));
-		assertEquals("tb-program-concept-uuid", line.get("Program concept"));
-		assertEquals("tb-program-outcomes-concept-uuid", line.get("Outcomes concept"));
+		assertEquals("tb-program-concept-uuid", line.get("program concept"));
+		assertEquals("tb-program-outcomes-concept-uuid", line.get("outcomes concept"));
 		assertNull(line.get("void/retire"));
 	}
 	
@@ -54,8 +54,8 @@ class ProgramLineExporterTest {
 		
 		assertEquals("28f3da50-3f56-4e4e-93cd-66f334970480", line.get("uuid"));
 		assertEquals("true", line.get("void/retire"));
-		assertNull(line.get("Program concept"), "retired rows carry only uuid + flag");
-		assertNull(line.get("Outcomes concept"), "retired rows carry only uuid + flag");
+		assertNull(line.get("program concept"), "retired rows carry only uuid + flag");
+		assertNull(line.get("outcomes concept"), "retired rows carry only uuid + flag");
 	}
 	
 	@Test
@@ -67,7 +67,7 @@ class ProgramLineExporterTest {
 		ExportLine line = new ExportLine();
 		new ProgramLineExporter().writeLine(program, line);
 		
-		assertEquals("aids-program-concept-uuid", line.get("Program concept"));
-		assertNull(line.get("Outcomes concept"));
+		assertEquals("aids-program-concept-uuid", line.get("program concept"));
+		assertNull(line.get("outcomes concept"));
 	}
 }

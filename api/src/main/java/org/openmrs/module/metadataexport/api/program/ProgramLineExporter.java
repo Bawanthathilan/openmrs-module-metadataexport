@@ -16,9 +16,9 @@ import org.openmrs.module.metadataexport.api.export.MetadataLineExporter;
 
 public class ProgramLineExporter extends MetadataLineExporter<Program> {
 	
-	public static final String HEADER_CONCEPT_PROGRAM = "Program concept";
+	public static final String HEADER_CONCEPT_PROGRAM = "program concept";
 	
-	public static final String HEADER_OUTCOMES_CONCEPT = "Outcomes concept";
+	public static final String HEADER_OUTCOMES_CONCEPT = "outcomes concept";
 	
 	@Override
 	public void export(Program program, ExportLine line) {
