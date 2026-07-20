@@ -45,6 +45,8 @@ Currently supported domains:
   cross domain closure
 * Programs (program concept, outcomes concept) — the referenced concepts are pulled in via
   cross domain closure
+* Program workflows (program, workflow concept) — the referenced program and concept are pulled in
+  via cross-domain closure
 * Concept reference ranges (concept numeric, absolute/critical/normal low and high, criteria) — the
   referenced concept numeric is pulled in via cross domain closure
 
