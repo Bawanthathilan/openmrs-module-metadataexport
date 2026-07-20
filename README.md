@@ -36,6 +36,8 @@ Currently supported domains:
 * Location Tags (name, description)
 * Locations (name, description, parent location, tags, address fields) — parent locations and tags
   are pulled in via cross-domain closure
+* Drugs (name, description, strength, concept drug, concept dosage form, ingredients, mappings) —
+  drug/dosage-form/ingredient concepts are pulled in via cross-domain closure
 * Order types (name, description, java class name, parent, concept classes) — parent order types and
   concept classes are pulled in via cross-domain closure
 * Flags (name, criteria, evaluator, message, priority, enabled, tags, description)
@@ -43,11 +45,12 @@ Currently supported domains:
   cross domain closure
 * Programs (program concept, outcomes concept) — the referenced concepts are pulled in via
   cross domain closure
+* Concept reference ranges (concept numeric, absolute/critical/normal low and high, criteria) — the
+  referenced concept numeric is pulled in via cross domain closure
 
 Planned domains (openmrs-core metadata, not yet supported):
 
-* Tier 3 — concept-dependent: drugs, order frequencies, program workflows/states, concept sets,
-  concept reference ranges
+* Tier 3 — concept-dependent: program workflows/states, concept sets
 
 Non-exportable Initializer domains (Liquibase, JSON key-values, system tasks) are
 out of scope.
