@@ -49,11 +49,11 @@ Currently supported domains:
   via cross-domain closure
 * Concept reference ranges (concept numeric, absolute/critical/normal low and high, criteria) — the
   referenced concept numeric is pulled in via cross domain closure
+* Program Workflows (program, workflow concept) — the referenced program and concept are pulled in via cross domain closure
 
 Planned domains (openmrs-core metadata, not yet supported):
 
 * Concept sets
-* Program workflows
 * Program workflow states
 * Procedure types
 * Provider roles
