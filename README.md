@@ -56,7 +56,6 @@ Currently supported domains:
 
 Planned domains (openmrs-core metadata, not yet supported):
 
-* Program workflow states
 * Procedure types
 * Provider roles
 
