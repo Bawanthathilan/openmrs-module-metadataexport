@@ -56,12 +56,12 @@ Currently supported domains:
 
 Planned domains (openmrs-core metadata, not yet supported):
 
-* Procedure types
 * Provider roles
 
 Domains contributed by other modules (supportable, but depend on the module being present;
 not yet covered):
 
+* Procedure types (emrapi 3.4+)
 * Metadata sharing / mapping (metadatasharing, metadata sets, metadata set members, metadata
   term mappings)
 * Identifier generation (idgen, auto-generation options)
